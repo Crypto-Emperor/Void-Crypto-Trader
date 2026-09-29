@@ -1,0 +1,16 @@
+{
+  "accounts": [
+    {
+      "id": "1",
+      "name": "main",
+      "starting_balance": 100.0,
+      "mode": "sim",
+      "enabled": true,
+      "fomo_email": null,
+      "fomo_password": null,
+      "fomo_access_token": null,
+      "live_max_usd": 200.0,
+      "strategy": null
+    }
+  ]
+}

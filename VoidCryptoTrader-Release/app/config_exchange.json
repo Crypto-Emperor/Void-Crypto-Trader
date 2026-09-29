@@ -1,0 +1,11 @@
+{
+  "dry_run": true,
+  "starting_balance": 100,
+  "max_position_pct": 6,
+  "max_cash_pct": 75,
+  "check_interval_sec": 5,
+  "stake_currency": "USD",
+  "pairs": ["SOL", "BTC", "ETH", "JUP", "RAY", "BONK", "WIF", "POPCAT"],
+  "strategy": "top_accounts_copy",
+  "api_keys_file": "keys/api_keys.env"
+}

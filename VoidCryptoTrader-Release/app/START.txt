@@ -1,0 +1,9 @@
+VOID CRYPTO TRADER
+License: Apache 2.0 (LICENSE file)
+
+1. AFTER_UNZIP.bat or SETUP_AND_RUN.bat
+2. Click coin chips (SOL, BONK, WIF...) to change the chart
+3. Settings = capital, API keys, colors
+4. Start Bot
+
+Coin chart no longer stuck on SOL — click another chip.

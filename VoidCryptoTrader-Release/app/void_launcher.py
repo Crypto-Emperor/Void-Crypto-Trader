@@ -203,12 +203,45 @@ def build_menu(root) -> None:
 
 
 def main_menu() -> int:
-    import tkinter as tk
-    import tkinter.messagebox  # noqa: F401  (used by launch error path)
-    root = tk.Tk()
+    try:
+        import tkinter as tk
+        import tkinter.messagebox  # noqa: F401  (used by launch error path)
+    except (ImportError, Exception):
+        return _terminal_menu()
+    try:
+        root = tk.Tk()
+    except Exception:  # headless box / no DISPLAY -> fall back to terminal menu
+        return _terminal_menu()
     build_menu(root)
     root.mainloop()
     return 0
+
+
+def _terminal_menu() -> int:
+    """Headless fallback menu (Linux/macOS without Tk or DISPLAY)."""
+    options = [
+        ("Web dashboard (recommended)", "web"),
+        ("Trading desk (terminal bot)", "--mode worker"),
+        ("Portfolio status", "status"),
+        ("Build/run from source only - exit", None),
+    ]
+    print("\n  VOID CRYPTO TRADER")
+    print("  ==================\n")
+    for i, (label, _) in enumerate(options, 1):
+        print(f"   [{i}] {label}")
+    try:
+        pick = input("\n  Pick one: ").strip()
+    except (EOFError, KeyboardInterrupt):
+        return 0
+    idx = {"1": 0, "2": 1, "3": 2}.get(pick)
+    if idx is None:
+        return 0
+    label, mode = options[idx]
+    if mode == "web":
+        return run_web([])
+    if mode.startswith("--mode"):
+        return run_worker([])
+    return run_cli(["status"])
 
 
 # ------------------------------------------------------------------- main --

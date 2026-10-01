@@ -17,7 +17,7 @@ copy-trading, and optional live execution through Jupiter.
 
 ## ⚡ One launcher. Zero fuss.
 
-**Double-click [`Void.bat`](Void.bat).** That's the whole setup.
+**Windows:** double-click [`Void.bat`](Void.bat). **Linux / macOS:** run [`./Void.sh`](Void.sh). That's the whole setup.
 
 It finds (or installs) Python, pulls dependencies once, and opens the dashboard at
 `http://127.0.0.1:8080`. No PATH spelunking, no five scripts to keep in sync.
@@ -29,6 +29,17 @@ Void.bat status     :: portfolio snapshot
 Void.bat gui        :: desktop chart terminal
 Void.bat menu       :: interactive picker
 Void.bat build      :: compile a real VoidCryptoTrader.exe (PyInstaller)
+```
+
+Same commands on Linux / macOS:
+
+```sh
+./Void.sh           # web dashboard (default)
+./Void.sh trade     # terminal trading desk
+./Void.sh status    # portfolio snapshot
+./Void.sh gui       # desktop chart terminal
+./Void.sh menu      # interactive picker
+./Void.sh build     # compile a single-file executable for your OS
 ```
 
 > Prefer an `.exe`? Run `Void.bat build` once on Windows and you get a single-file
@@ -51,7 +62,8 @@ Void.bat build      :: compile a real VoidCryptoTrader.exe (PyInstaller)
 
 ```
 .
-├── Void.bat                     ← the only thing you touch
+├── Void.bat                     ← Windows launcher (the only thing you touch)
+├── Void.sh                      ← Linux / macOS launcher (same commands)
 ├── void-crypto-trader/          ← source (bot, strategies, risk, executor)
 │   └── void-crypto-trader/
 │       ├── bot.py               terminal trading desk
@@ -68,7 +80,7 @@ Void.bat build      :: compile a real VoidCryptoTrader.exe (PyInstaller)
 
 ## 🔧 Quick start (manual)
 
-Don't want the `.bat`? Three commands:
+Don't want the launcher? Three commands (works on Windows, Linux and macOS):
 
 ```bash
 cd VoidCryptoTrader-Release/app

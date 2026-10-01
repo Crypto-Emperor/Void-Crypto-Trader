@@ -8,3 +8,11 @@ protections_state.json
 session_meta.json
 equity_history.json
 price_history.json
+# Built binaries & build artifacts (rebuild with Void.bat/Void.sh build)
+VoidCryptoTrader.exe
+VoidCryptoTrader-*
+VoidCryptoTrader-Release/dist/
+VoidCryptoTrader-Release/app/build/
+VoidCryptoTrader-Release/app/*.spec
+.void_deps_ok
+*.pid

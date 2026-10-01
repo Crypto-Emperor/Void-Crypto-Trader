@@ -10,7 +10,7 @@ Status: SCAFFOLD / TEMPLATE
 - Login and navigation are implemented as a starting point.
 - Exact selectors for buy/sell buttons, token search, confirm dialogs
   change over time and MUST be updated by inspecting the live site
-  (DevTools → copy selector) after you log in once.
+  (DevTools -> copy selector) after you log in once.
 
 How to finish wiring:
 1. Install browsers:  playwright install chromium

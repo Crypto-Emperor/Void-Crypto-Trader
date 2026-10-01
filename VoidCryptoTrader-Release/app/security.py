@@ -28,14 +28,14 @@ SAFE_SYMBOLS = {
     "jup", "ray", "pyth", "jito", "render",
 }
 
-# Known mint → treat as safe major when price path uses mint
+# Known mint -> treat as safe major when price path uses mint
 SAFE_MINTS = {
     "So11111111111111111111111111111111111111112",  # SOL
     "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v",  # USDC
     "Es9vMFrzaCERmJfrF4H2FYD4KCoNkY11McCe8BenwNYB",  # USDT
 }
 
-# Map symbol → default chain for scan (solana-first for FOMO)
+# Map symbol -> default chain for scan (solana-first for FOMO)
 DEFAULT_CHAIN = "solana"
 
 # GoPlus EVM chain ids
@@ -315,7 +315,7 @@ def check_before_buy(
     """
     Gate for execute_buy.
     Returns (allowed, message, result).
-    strict=True → fail closed on scanner errors / unknown tokens.
+    strict=True -> fail closed on scanner errors / unknown tokens.
     """
     key = symbol_or_mint.strip()
     lower = key.lower()

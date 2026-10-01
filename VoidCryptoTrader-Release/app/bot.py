@@ -863,7 +863,7 @@ def pilot_cmd(limit):
     table.add_column("Drivers")
     for i, s in enumerate(dash["signals"], 1):
         style = {"long": "green", "short": "red", "neutral": "yellow"}.get(s.side, "white")
-        flip = " ↺" if s.flipped else ""
+        flip = "" if s.flipped else ""
         table.add_row(
             str(i),
             s.symbol.upper() + flip,

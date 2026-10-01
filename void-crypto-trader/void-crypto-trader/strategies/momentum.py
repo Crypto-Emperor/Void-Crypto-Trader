@@ -30,7 +30,7 @@ class MomentumStrategy(Strategy):
             ma = sum(hist) / len(hist)
             change = (price - ma) / ma if ma else 0
 
-            # Strong up → buy
+            # Strong up -> buy
             if change > 0.015:  # >1.5% above MA
                 # don't over-allocate
                 current_val = 0.0
@@ -42,7 +42,7 @@ class MomentumStrategy(Strategy):
                                reason=f"momentum +{change*100:.1f}% vs MA")
                     )
 
-            # Strong down → sell 30%
+            # Strong down -> sell 30%
             elif change < -0.02 and sym in portfolio.positions:
                 signals.append(
                     Signal("sell", sym, amount="30%", reason=f"momentum {change*100:.1f}% vs MA")

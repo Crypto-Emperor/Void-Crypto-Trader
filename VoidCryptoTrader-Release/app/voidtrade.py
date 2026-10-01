@@ -232,7 +232,7 @@ refresh(); setInterval(refresh, 4000);
             pass
         return jsonify({"ok": True})
 
-    print("VoidTrade web UI → http://127.0.0.1:8080")
+    print("VoidTrade web UI -> http://127.0.0.1:8080")
     threading.Timer(1.0, lambda: webbrowser.open("http://127.0.0.1:8080")).start()
     app.run(host="127.0.0.1", port=8080, debug=False, use_reloader=False)
 

@@ -36,7 +36,7 @@ Without it, honeypot checks use public endpoints where possible, or skip soft-fa
 
 Public RPC works for testing. For 1-second wallet copy, a free Helius key is better:
 
-1. **https://www.helius.dev/** → sign up → create API key  
+1. **https://www.helius.dev/** -> sign up -> create API key  
 2. Set:
 
 ```env

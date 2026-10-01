@@ -3,7 +3,7 @@
 ## 1. Create the free VM
 
 1. Sign up: https://www.oracle.com/cloud/free/
-2. Compute → Create instance
+2. Compute -> Create instance
 3. Image: **Canonical Ubuntu 22.04** or 24.04 (ARM)
 4. Shape: **VM.Standard.A1.Flex** (Ampere ARM)
 5. Stay within Always Free limits (as of mid-2026 roughly **2 OCPU + 12 GB RAM** total across A1)

@@ -1,0 +1,10 @@
+# Python compiled files
+__pycache__/
+*.pyc
+
+# Logs and temporary state files
+*.log
+protections_state.json
+session_meta.json
+equity_history.json
+price_history.json

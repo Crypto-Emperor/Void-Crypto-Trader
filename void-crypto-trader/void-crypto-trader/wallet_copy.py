@@ -224,26 +224,20 @@ def execute_copy_trade(token_mint: str, signature: str) -> bool:
         f"from tx={signature[:16]}... mode={MODE} (live, still 6% rule in sizing)"
     )
 
-    # LIVE path - private key required
-    if not SOLANA_PRIVATE_KEY:
-        console.print("[red]LIVE mode but SOLANA_PRIVATE_KEY not set - refused[/red]")
-        return False
-
+    # LIVE path - real Jupiter swap via Phantom keypair (executor/jupiter.py).
+    # All safety rails (LIVE_TRADING switch, per-trade cap, daily loss breaker,
+    # honeypot scan) are enforced inside executor.jupiter.live_buy itself.
     console.print(
-        "[yellow]Live Jupiter swap scaffold: install solders+solana and "
-        "complete swap tx signing before using real funds.[/yellow]"
+        "[yellow]LIVE wallet-copy on-chain buy via Jupiter (safety rails apply)[/yellow]"
     )
-    # Quote only for safety in this version - full swap needs careful signing
-    wsol = "So11111111111111111111111111111111111111112"
-    # amount in lamports for ~COPY_USD is approximate without price oracle
-    quote = jupiter_quote(wsol, token_mint, amount_raw=1_000_000)  # 0.001 SOL test size
-    if quote:
-        console.print(f"[dim]Jupiter quote outAmount={quote.get('outAmount')}[/dim]")
-        console.print(
-            "[red]Auto-broadcast disabled by default. "
-            "Enable only after you review and implement signed swap submit.[/red]"
-        )
-    return False
+    try:
+        from executor.jupiter import live_buy as jlive_buy
+        ok, msg = jlive_buy(token_mint, COPY_USD)
+        console.print(f"{'[green]' if ok else '[red]'}LIVE copy {token_mint[:10]}...: {msg}[/]")
+        return ok
+    except Exception as e:
+        console.print(f"[red]live executor error: {e}[/red]")
+        return False
 
 
 async def scan_leader_every_second(wallet: str | None = None) -> None:

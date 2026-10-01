@@ -1,0 +1,8 @@
+
+# secrets - never commit
+keys/*.env
+keys/phantom.json
+*.key
+live_executor_state.json
+wallet_copy_state.json
+__pycache__/

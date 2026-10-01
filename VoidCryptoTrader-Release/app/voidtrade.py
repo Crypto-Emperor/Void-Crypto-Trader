@@ -14,19 +14,27 @@ import threading
 import webbrowser
 from pathlib import Path
 
-ROOT = Path(__file__).resolve().parent
-sys.path.insert(0, str(ROOT))
+ROOT = Path(__file__).resolve().parent  # bundled source dir (read-only in exe)
+if getattr(sys, "frozen", False):
+    # Packaged .exe: user data (config/keys/state) lives next to the exe.
+    DATA_ROOT = Path(sys.executable).resolve().parent
+else:
+    DATA_ROOT = ROOT
+# Source modules first (so imports work from the bundle), then data dir.
+for _p in (str(DATA_ROOT), str(ROOT)):
+    if _p not in sys.path:
+        sys.path.insert(0, _p)
 
 try:
     from dotenv import load_dotenv
-    load_dotenv(ROOT / ".env")
-    load_dotenv(ROOT / "keys" / "api_keys.env", override=True)
+    load_dotenv(DATA_ROOT / ".env")
+    load_dotenv(DATA_ROOT / "keys" / "api_keys.env", override=True)
 except Exception:
     pass
 
 
 def load_config() -> dict:
-    p = ROOT / "config_exchange.json"
+    p = DATA_ROOT / "config_exchange.json"
     if p.exists():
         return json.loads(p.read_text(encoding="utf-8"))
     return {"dry_run": True, "starting_balance": 100, "pairs": ["SOL", "BTC"]}

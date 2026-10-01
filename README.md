@@ -1,106 +1,96 @@
 # Void Crypto Trader
 
-Python crypto trading bot you control from **VS Code**.
+<p align="center">
+  <img src="https://img.shields.io/badge/python-3.10%2B-blue?style=flat-square&logo=python" alt="Python">
+  <img src="https://img.shields.io/badge/license-Apache--2.0-green?style=flat-square" alt="License">
+  <img src="https://img.shields.io/badge/mode-paper%20first-orange?style=flat-square" alt="Paper first">
+  <img src="https://img.shields.io/badge/chain-Solana%20%C2%B7%20ETH%20%C2%B7%20CEX-lightgrey?style=flat-square" alt="Chains">
+  <img src="https://img.shields.io/badge/strategy-freqtrade--inspired-8A2BE2?style=flat-square" alt="Freqtrade inspired">
+</p>
 
-Simulation-first auto trading with free market data (CoinPaprika, CoinGecko, DexScreener), optional FOMO API leader flows, defensive sells, honeypot checks, and optional 1-second on-chain Solana wallet copy.
-
-## Highlights
-
-- **Paper trading by default** (`MODE=sim`)
-- **Auto strategies** (top-flow copy, pilot board, momentum, DCA, …)
-- **Risk caps**: Max 6% equity / 75% cash per trade
-- **Live trade feed** in your VS Code terminal
-- **API keys isolated** securely in `keys/`
-- **Optional FOMO API + Solana RPC** for live execution paths
+A crypto trading bot with a **web dashboard**, a **terminal desk**, and **desktop charts** —
+inspired by [Freqtrade](https://github.com/freqtrade/freqtrade), written in pure Python.
+Free market data, memecoin support, honeypot protection, risk caps, Phantom-wallet
+copy-trading, and optional live execution through Jupiter.
 
 ---
 
-## Getting Started
+## ⚡ One launcher. Zero fuss.
 
-### 1. Prerequisites
-Ensure you have the following installed on your local machine:
-- **Python 3.10+**
-- **VS Code** (with the Python extension installed)
-- **Git** (optional, for cloning)
+**Double-click [`Void.bat`](Void.bat).** That's the whole setup.
 
-### 2. Installation
-Clone this repository or download the source code zip file, then navigate to the project directory:
+It finds (or installs) Python, pulls dependencies once, and opens the dashboard at
+`http://127.0.0.1:8080`. No PATH spelunking, no five scripts to keep in sync.
 
-```bash
-cd void-crypto-trader
+```bat
+Void.bat            :: web dashboard (default)
+Void.bat trade      :: terminal trading desk
+Void.bat status     :: portfolio snapshot
+Void.bat gui        :: desktop chart terminal
+Void.bat menu       :: interactive picker
+Void.bat build      :: compile a real VoidCryptoTrader.exe (PyInstaller)
 ```
 
-Create a virtual environment and install the required dependencies:
+> Prefer an `.exe`? Run `Void.bat build` once on Windows and you get a single-file
+> `VoidCryptoTrader.exe` that runs without Python installed.
+
+---
+
+## ✨ Highlights
+
+| | |
+|---|---|
+| 🛡️ **Paper-first** | Dry-run by default; live trading is opt-in with daily loss caps and circuit breakers |
+| 📊 **Real indicators** | RSI, ATR, MACD, EMA confluence strategy with trailing stops & protections (freqtrade-style) |
+| 🐸 **Memecoins** | GeckoTerminal / DexScreener OHLCV for DEX-only tokens, degen-score ranking, dedicated meme sleeve (2% size, 10% total cap) |
+| 🕵️ **Wallet copy** | 1-second Solana wallet watcher + Phantom wallet integration via Jupiter swaps |
+| 🧪 **Honeypot checks** | GoPlus security scan before any meme buy — if sells aren't allowed, no entry |
+| 🔑 **Keys isolated** | All secrets live in `keys/api_keys.env`, gitignored, never in code |
+
+## 🗂️ Layout
+
+```
+.
+├── Void.bat                     ← the only thing you touch
+├── void-crypto-trader/          ← source (bot, strategies, risk, executor)
+│   └── void-crypto-trader/
+│       ├── bot.py               terminal trading desk
+│       ├── market_data.py       CEX + DEX candles
+│       ├── strategies/          confluence, momentum, dca, copy...
+│       ├── executor/            Jupiter live execution
+│       └── keys/                api_keys.env.example → copy me
+└── VoidCryptoTrader-Release/    ← packaged app used by Void.bat
+    └── app/
+        ├── voidtrade.py         web dashboard server
+        ├── gui_app.py           desktop charts
+        └── void_launcher.py     single-exe entry point
+```
+
+## 🔧 Quick start (manual)
+
+Don't want the `.bat`? Three commands:
 
 ```bash
-# Create virtual environment
-python -m venv venv
-
-# Activate it (Windows)
-.\venv\Scripts\activate
-
-# Activate it (Mac/Linux)
-source venv/bin/activate
-
-# Install dependencies
+cd VoidCryptoTrader-Release/app
 pip install -r requirements.txt
+python voidtrade.py web
 ```
 
-### 3. Configuration & Security
+Configure pairs, capital and dry-run in `app/config_exchange.json`; API keys in
+`app/keys/api_keys.env` (copy `api_keys.env.example`).
 
-Void Crypto Trader isolates all sensitive credentials. 
+## 🚨 Live trading checklist
 
-1. Create a `keys/` directory in the root folder if it doesn't exist.
-2. Inside `keys/`, create a `.env` file or `config.json` using the provided template:
+1. Start with `LIVE_DRY_RUN=true` and watch fills for a few days.
+2. Fund the Phantom key with **only what you can lose** (memecoins move fast).
+3. Keep `LIVE_TRADING=false` until your paper equity curve looks sane.
+4. Set `DAILY_LOSS_CAP` — the engine halts itself when hit. No exceptions.
 
-```env
-# Core Settings
-MODE=sim  # Options: sim, live
+## ⚠️ Disclaimer
 
-# API Credentials (Optional for basic market data, required for live/Solana)
-SOLANA_RPC_URL=your_secure_rpc_endpoint
-FOMO_API_KEY=your_fomo_api_key
-```
+Educational software. Crypto trading is extremely risky; most memecoins go to zero.
+Nothing here is financial advice. You are responsible for every transaction you sign.
 
-**Security Note:** The `keys/` directory is automatically added to `.gitignore` to prevent you from accidentally pushing your private keys or RPC endpoints to GitHub. *Never share your secrets.*
+## 📜 License
 
----
-
-## Usage
-
-To start the bot, simply open the repository folder in VS Code, open the integrated terminal (`Ctrl + \``), and run:
-
-```bash
-python main.py
-```
-
-### Selecting a Strategy
-When you run the bot, you will be prompted to choose a strategy, or you can pass it via the command line:
-
-```bash
-python main.py --strategy momentum
-```
-
-Available strategies include:
-- `sim-copy`: Simulates copying top-flow wallets.
-- `momentum`: Scans DexScreener/CoinGecko for rapid volume changes.
-- `dca`: Dollar-cost averaging based on preset risk caps.
-
----
-
-## Risk Management & Safety
-
-This bot is hardcoded with strict safety guardrails to protect capital:
-- **Max Loss Stop:** Automatic defensive sells if a position drops below your risk threshold.
-- **Honeypot Protection:** Pre-trade checks to ensure smart contracts allow selling before capital is committed.
-- **Exposure Cap:** Restricts individual trades to a maximum of 6% of total equity.
-
----
-
-## License
-
-This project is licensed under the Apache-2.0 License - see the [LICENSE](LICENSE) file for details.
-
-## Disclaimer
-
-*Void Crypto Trader is for educational and experimental purposes only. Cryptocurrency trading carries a high level of risk. The creators are not responsible for any financial losses incurred while using this software, whether in simulation or live modes.*
+Apache-2.0 — see [LICENSE](LICENSE).

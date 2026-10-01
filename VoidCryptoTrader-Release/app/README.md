@@ -16,15 +16,17 @@ python gui_app.py
 
 ### Build Windows .exe
 
+From the repo root, run:
+
 ```powershell
-build_exe.bat
+Void.bat build
 ```
 
-Or:
+Or manually:
 
 ```powershell
 python -m pip install pyinstaller matplotlib
-python -m PyInstaller --noconfirm --windowed --name VoidCryptoTrader gui_app.py
+python -m PyInstaller --noconfirm --windowed --name VoidCryptoTrader void_launcher.py
 ```
 
 Run `dist\VoidCryptoTrader.exe` from the project folder (so `keys\`, `.env`, and portfolio files work).

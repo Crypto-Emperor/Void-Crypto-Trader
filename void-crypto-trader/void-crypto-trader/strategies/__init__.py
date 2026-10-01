@@ -6,6 +6,7 @@ from .leaderboard_copy import LeaderboardCopyStrategy
 from .fomo_copy import FomoCopyStrategy
 from .top_accounts_copy import TopAccountsCopyStrategy
 from .pilot_signal import PilotSignalStrategy
+from .confluence import ConfluenceStrategy
 
 STRATEGIES = {
     "momentum": MomentumStrategy,
@@ -20,6 +21,8 @@ STRATEGIES = {
     "top": TopAccountsCopyStrategy,
     "pilot_signal": PilotSignalStrategy,
     "pilot": PilotSignalStrategy,
+    "confluence": ConfluenceStrategy,
+    "freq": ConfluenceStrategy,  # freqtrade-style engine alias
 }
 
 def get_strategy(name: str, account_id: str = "1") -> Strategy:
@@ -27,6 +30,7 @@ def get_strategy(name: str, account_id: str = "1") -> Strategy:
     cls = STRATEGIES.get(key)
     if not cls:
         raise ValueError(f"Unknown strategy: {name}. Choose from {list(STRATEGIES)}")
-    if key in ("fomo_copy", "copy", "top_accounts_copy", "top_copy", "top", "pilot_signal", "pilot"):
+    if key in ("fomo_copy", "copy", "top_accounts_copy", "top_copy", "top",
+               "pilot_signal", "pilot", "confluence", "freq"):
         return cls(account_id=account_id)
     return cls()

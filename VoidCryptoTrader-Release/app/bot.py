@@ -271,7 +271,11 @@ def do_start(foreground: bool = False, follow: bool = True):
         except Exception:
             pass
 
-    cmd = [sys.executable, "-u", str(BASE_DIR / "auto_trader.py")]
+    if getattr(sys, "frozen", False):
+        # Packaged .exe: re-invoke ourselves in hidden worker mode.
+        cmd = [sys.executable, "--mode", "worker"]
+    else:
+        cmd = [sys.executable, "-u", str(BASE_DIR / "auto_trader.py")]
     cwd = str(BASE_DIR)
     env = os.environ.copy()
     env["PYTHONUNBUFFERED"] = "1"

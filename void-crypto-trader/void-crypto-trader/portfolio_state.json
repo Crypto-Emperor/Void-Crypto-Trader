@@ -1,0 +1,30 @@
+{
+  "cash": 1002.2513194444444,
+  "starting_balance": 1000.0,
+  "mode": "sim",
+  "positions": {},
+  "trades": [
+    {
+      "side": "buy",
+      "symbol": "sol",
+      "amount": 0.2763888888888889,
+      "price": 180.0,
+      "usd_value": 50.0,
+      "fee": 0.25,
+      "timestamp": "2026-10-01T22:13:20.794054+00:00",
+      "mode": "sim",
+      "note": "sim e2e"
+    },
+    {
+      "side": "sell",
+      "symbol": "sol",
+      "amount": 0.2763888888888889,
+      "price": 190.0,
+      "usd_value": 52.51388888888889,
+      "fee": 0.26256944444444447,
+      "timestamp": "2026-10-01T22:13:20.794361+00:00",
+      "mode": "sim",
+      "note": ""
+    }
+  ]
+}

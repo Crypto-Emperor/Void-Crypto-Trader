@@ -22,6 +22,13 @@ class Position:
     amount: float
     avg_entry: float
     opened_at: str
+    # --- risk engine fields (all optional; old state files still load) ---
+    stop_price: Optional[float] = None      # structural / ATR stop
+    take_profit: Optional[float] = None     # first target (partial TP)
+    highest_seen: Optional[float] = None    # high water mark for chandelier trail
+    tp_done: bool = False                   # partial take-profit already taken
+    entry_note: str = ""                    # why we bought (signal + score)
+    last_exit_ts: float = 0.0               # re-entry cooldown bookkeeping
 
     def market_value(self, price: float) -> float:
         return self.amount * price
@@ -32,7 +39,25 @@ class Position:
     def pnl_pct(self, price: float) -> float:
         if self.avg_entry == 0:
             return 0.0
-        return ((price - self.avg_entry) / self.avg_entry) * 100
+        return ((price - self.avg_entry) / self.avg_entry) * 100 * 1.0
+
+    def r_multiple(self, price: float) -> float:
+        """Unrealized PnL expressed in R (multiples of initial risk)."""
+        if not self.stop_price or self.avg_entry <= 0:
+            return 0.0
+        risk_pct = (self.avg_entry - self.stop_price) / self.avg_entry
+        if risk_pct <= 0:
+            return 0.0
+        return (price - self.avg_entry) / self.avg_entry / risk_pct
+
+    def age_hours(self) -> float:
+        try:
+            t0 = datetime.fromisoformat(self.opened_at)
+            if t0.tzinfo is None:
+                t0 = t0.replace(tzinfo=timezone.utc)
+            return max(0.0, (datetime.now(timezone.utc) - t0).total_seconds() / 3600.0)
+        except Exception:
+            return 0.0
 
 
 @dataclass
@@ -147,15 +172,12 @@ def execute_buy(
     if price is None or price <= 0:
         return False, f"No price for {symbol}"
 
-    # Live path
-    if portfolio.mode == "live" and settings.is_live:
-        try:
-            from executor.live_fomo import live_buy
-            ok, msg = live_buy(symbol, usd_amount)
-            if not ok:
-                return False, f"LIVE buy failed: {msg}"
-        except Exception as e:
-            return False, f"LIVE executor error: {e}"
+    # Live path: Jupiter/Phantom on-chain executor (preferred), FOMO UI fallback
+    if portfolio.mode == "live":
+        from executor import route_live_buy
+        ok, msg = route_live_buy(symbol, usd_amount)
+        if not ok:
+            return False, f"LIVE buy failed: {msg}"
 
     fee = usd_amount * FEE_RATE
     net = usd_amount - fee
@@ -211,18 +233,31 @@ def execute_sell(
     if price is None or price <= 0:
         return False, f"No price for {symbol}"
 
-    if portfolio.mode == "live" and settings.is_live:
-        try:
-            from executor.live_fomo import live_sell
-            ok, msg = live_sell(symbol, tokens)
-            if not ok:
-                return False, f"LIVE sell failed: {msg}"
-        except Exception as e:
-            return False, f"LIVE executor error: {e}"
+    if portfolio.mode == "live":
+        from executor import route_live_sell
+        ok, msg = route_live_sell(symbol, tokens)
+        if not ok:
+            return False, f"LIVE sell failed: {msg}"
 
     usd_gross = tokens * price
     fee = usd_gross * FEE_RATE
     usd_net = usd_gross - fee
+
+    # Live fills: book realized PnL against the daily circuit breaker
+    if portfolio.mode == "live":
+        try:
+            risk_usd = pos.avg_entry * tokens
+            from executor import resolve_mint
+            from executor.jupiter import note_fill
+            pnl = usd_net - risk_usd
+            note_fill("sell", usd_gross, pnl_usd=pnl)
+            if resolve_mint(symbol):
+                console_note = f" | live realized {pnl:+.2f}USD"
+            else:
+                console_note = ""
+            note = (note + console_note) if console_note else note
+        except Exception:
+            pass
 
     pos.amount -= tokens
     if pos.amount < 1e-10:

@@ -2,6 +2,12 @@
 __pycache__/
 *.pyc
 
+# Secrets — never commit real keys (api_keys.env.example is the template)
+keys/*.env
+!**/api_keys.env.example
+.env
+phantom.json
+
 # Logs and temporary state files
 *.log
 protections_state.json

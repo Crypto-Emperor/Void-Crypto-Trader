@@ -13,14 +13,39 @@ inspired by [Freqtrade](https://github.com/freqtrade/freqtrade), written in pure
 Free market data, memecoin support, honeypot protection, risk caps, Phantom-wallet
 copy-trading, and optional live execution through Jupiter.
 
+**Works on Windows, Linux and macOS.** Runs paper-trading out of the box with free data —
+no API keys needed to try it.
+
 ---
 
-## ⚡ One launcher. Zero fuss.
+## 🚀 Setup (30 seconds)
 
-**Windows:** double-click [`Void.bat`](Void.bat). **Linux / macOS:** run [`./Void.sh`](Void.sh). That's the whole setup.
+**Requirements:** nothing but an internet connection. The launcher finds Python for you
+(and prints the right install command for your OS if it's missing).
 
-It finds (or installs) Python, pulls dependencies once, and opens the dashboard at
-`http://127.0.0.1:8080`. No PATH spelunking, no five scripts to keep in sync.
+### Windows
+
+1. Download / clone this repo.
+2. Double-click **[`Void.bat`](Void.bat)**.
+
+### Linux / macOS
+
+```sh
+git clone https://github.com/YOURNAME/void-crypto-trader.git
+cd void-crypto-trader
+chmod +x Void.sh      # only needed once after cloning
+./Void.sh
+```
+
+On first run the launcher installs dependencies automatically (about a minute, one time
+only), then opens the web dashboard at **`http://127.0.0.1:8080`**. That's it — no PATH
+spelunking, no virtualenv wrangling, no five scripts to keep in sync.
+
+> Prefer an executable? Run `Void.bat build` on Windows for a single-file
+> `VoidCryptoTrader.exe`, or `./Void.sh build` on Linux/macOS for a standalone binary —
+> both work without Python installed.
+
+## ⚡ Commands
 
 ```bat
 Void.bat            :: web dashboard (default)
@@ -58,6 +83,32 @@ Same commands on Linux / macOS:
 | 🧪 **Honeypot checks** | GoPlus security scan before any meme buy — if sells aren't allowed, no entry |
 | 🔑 **Keys isolated** | All secrets live in `keys/api_keys.env`, gitignored, never in code |
 
+## 🔑 Configuration & API keys
+
+**Paper trading needs zero keys** — market data comes from free public APIs
+(Binance/Coinbase candles, GeckoTerminal/DexScreener for memecoins).
+
+Optional keys go in **`VoidCryptoTrader-Release/app/keys/api_keys.env`**:
+
+```sh
+cd VoidCryptoTrader-Release/app/keys
+cp api_keys.env.example api_keys.env    # then edit with any text editor
+```
+
+| Variable | What it unlocks | Where to get it |
+|---|---|---|
+| `GOPLUS_API_KEY` | Honeypot / sell-tax scans before meme buys | [gopluslabs.io](https://gopluslabs.io/) |
+| `FOMOAPI_KEY` | Real FOMO trending / most-held boards | [fomoapi.io](https://fomoapi.io/dashboard) |
+| `RPC_HTTP_URL` or `HELIUS_API_KEY` | Fast Solana RPC for wallet copy-trading | [helius.dev](https://www.helius.dev/) |
+| `JUPITER_API_KEY` | Higher-rate Jupiter swap quotes | [station.jup.ag](https://station.jup.ag/) |
+| `SOLANA_PRIVATE_KEY` *(live only)* | Signing real swaps via Phantom-exported key | your wallet |
+
+The file is **gitignored** — your secrets never leave your machine. Pairs, capital and
+dry-run mode live in `app/config_exchange.json`.
+
+To go live later: set `LIVE_TRADING=true`, keep `LIVE_DRY_RUN=true` for the first few
+days, and always set `LIVE_DAILY_LOSS_LIMIT_USD` (see checklist below).
+
 ## 🗂️ Layout
 
 ```
@@ -78,18 +129,18 @@ Same commands on Linux / macOS:
         └── void_launcher.py     single-exe entry point
 ```
 
-## 🔧 Quick start (manual)
+## 🔧 Quick start (manual, without the launcher)
 
-Don't want the launcher? Three commands (works on Windows, Linux and macOS):
+Three commands — works identically on Windows, Linux and macOS:
 
 ```bash
 cd VoidCryptoTrader-Release/app
 pip install -r requirements.txt
-python voidtrade.py web
+python voidtrade.py web          # Windows: py -3 voidtrade.py web
 ```
 
-Configure pairs, capital and dry-run in `app/config_exchange.json`; API keys in
-`app/keys/api_keys.env` (copy `api_keys.env.example`).
+Then open **http://127.0.0.1:8080**. Other sub-commands: `voidtrade.py trade`,
+`voidtrade.py status`, `voidtrade.py gui`.
 
 ## 🚨 Live trading checklist
 
@@ -97,6 +148,17 @@ Configure pairs, capital and dry-run in `app/config_exchange.json`; API keys in
 2. Fund the Phantom key with **only what you can lose** (memecoins move fast).
 3. Keep `LIVE_TRADING=false` until your paper equity curve looks sane.
 4. Set `DAILY_LOSS_CAP` — the engine halts itself when hit. No exceptions.
+
+## 🩺 Troubleshooting
+
+| Symptom | Fix |
+|---|---|
+| `./Void.sh: Permission denied` | Run `chmod +x Void.sh` once (common after copying files between machines) |
+| Launcher says Python not found | Install Python 3.10+ ([python.org](https://www.python.org/downloads/)); on Ubuntu: `sudo apt-get install -y python3 python3-pip` |
+| First-run dependency install fails | Re-run the launcher; if pip keeps failing, use the manual quick start above with a venv |
+| Dashboard won't open in browser | Go to `http://127.0.0.1:8080` manually; check nothing else uses port 8080 |
+| `gui` does nothing on a server | Headless machine — no display for Tkinter; use `web` or `trade` instead |
+| Live swaps rejected / honeypot warnings | Normal safety rails — that's the GoPlus scan doing its job |
 
 ## ⚠️ Disclaimer
 

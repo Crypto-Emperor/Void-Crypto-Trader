@@ -13,7 +13,7 @@ from config import settings
 
 
 def _realized_annualized(pf: Portfolio, prices: dict[str, float]) -> float | None:
-    """Rough annualized return from portfolio start → now."""
+    """Rough annualized return from portfolio start -> now."""
     equity = pf.total_equity(prices)
     if pf.starting_balance <= 0 or not pf.trades:
         return None

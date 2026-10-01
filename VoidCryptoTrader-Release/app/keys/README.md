@@ -13,7 +13,7 @@ Paste free or **paid** keys here. The bot picks the first available Solana RPC.
 | **Triton** | https://triton.one/ | `TRITON_RPC_URL=https://...` (paid) |
 | **Any paid RPC** | your dashboard | `RPC_HTTP_URL=https://...` (always works) |
 
-**Priority:** `RPC_HTTP_URL` → Helius → QuickNode → Alchemy → Chainstack → Triton → public Solana.
+**Priority:** `RPC_HTTP_URL` -> Helius -> QuickNode -> Alchemy -> Chainstack -> Triton -> public Solana.
 
 Public RPC is free but **not** reliable at 0.1s. For 0.1s use Helius/Alchemy/Chainstack free or paid.
 

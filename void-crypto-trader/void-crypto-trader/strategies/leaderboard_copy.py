@@ -2,8 +2,8 @@
 Copy-trade style strategy driven by FOMO leaderboard consensus.
 
 - Fetch top traders for a window (24h / 7d)
-- Tokens that appear in multiple top traders' holdings → BUY
-- Tokens we hold that dropped off consensus → partial SELL
+- Tokens that appear in multiple top traders' holdings -> BUY
+- Tokens we hold that dropped off consensus -> partial SELL
 """
 
 from __future__ import annotations

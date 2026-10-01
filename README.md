@@ -18,7 +18,7 @@ no API keys needed to try it.
 
 ---
 
-## 🚀 Setup (30 seconds)
+## Setup (30 seconds)
 
 **Requirements:** nothing but an internet connection. The launcher finds Python for you
 (and prints the right install command for your OS if it's missing).
@@ -45,7 +45,7 @@ spelunking, no virtualenv wrangling, no five scripts to keep in sync.
 > `VoidCryptoTrader.exe`, or `./Void.sh build` on Linux/macOS for a standalone binary —
 > both work without Python installed.
 
-## ⚡ Commands
+## Commands
 
 ```bat
 Void.bat            :: web dashboard (default)
@@ -72,18 +72,18 @@ Same commands on Linux / macOS:
 
 ---
 
-## ✨ Highlights
+## Highlights
 
 | | |
 |---|---|
-| 🛡️ **Paper-first** | Dry-run by default; live trading is opt-in with daily loss caps and circuit breakers |
-| 📊 **Real indicators** | RSI, ATR, MACD, EMA confluence strategy with trailing stops & protections (freqtrade-style) |
-| 🐸 **Memecoins** | GeckoTerminal / DexScreener OHLCV for DEX-only tokens, degen-score ranking, dedicated meme sleeve (2% size, 10% total cap) |
-| 🕵️ **Wallet copy** | 1-second Solana wallet watcher + Phantom wallet integration via Jupiter swaps |
-| 🧪 **Honeypot checks** | GoPlus security scan before any meme buy — if sells aren't allowed, no entry |
-| 🔑 **Keys isolated** | All secrets live in `keys/api_keys.env`, gitignored, never in code |
+| **Paper-first** | Dry-run by default; live trading is opt-in with daily loss caps and circuit breakers |
+| **Real indicators** | RSI, ATR, MACD, EMA confluence strategy with trailing stops & protections (freqtrade-style) |
+| **Memecoins** | GeckoTerminal / DexScreener OHLCV for DEX-only tokens, degen-score ranking, dedicated meme sleeve (2% size, 10% total cap) |
+| **Wallet copy** | 1-second Solana wallet watcher + Phantom wallet integration via Jupiter swaps |
+| **Honeypot checks** | GoPlus security scan before any meme buy — if sells aren't allowed, no entry |
+| **Keys isolated** | All secrets live in `keys/api_keys.env`, gitignored, never in code |
 
-## 🔑 Configuration & API keys
+## Configuration & API keys
 
 **Paper trading needs zero keys** — market data comes from free public APIs
 (Binance/Coinbase candles, GeckoTerminal/DexScreener for memecoins).
@@ -109,27 +109,27 @@ dry-run mode live in `app/config_exchange.json`.
 To go live later: set `LIVE_TRADING=true`, keep `LIVE_DRY_RUN=true` for the first few
 days, and always set `LIVE_DAILY_LOSS_LIMIT_USD` (see checklist below).
 
-## 🗂️ Layout
+## Layout
 
 ```
 .
-├── Void.bat                     ← Windows launcher (the only thing you touch)
-├── Void.sh                      ← Linux / macOS launcher (same commands)
-├── void-crypto-trader/          ← source (bot, strategies, risk, executor)
+├── Void.bat                     <- Windows launcher (the only thing you touch)
+├── Void.sh                      <- Linux / macOS launcher (same commands)
+├── void-crypto-trader/          <- source (bot, strategies, risk, executor)
 │   └── void-crypto-trader/
 │       ├── bot.py               terminal trading desk
 │       ├── market_data.py       CEX + DEX candles
 │       ├── strategies/          confluence, momentum, dca, copy...
 │       ├── executor/            Jupiter live execution
-│       └── keys/                api_keys.env.example → copy me
-└── VoidCryptoTrader-Release/    ← packaged app used by Void.bat
+│       └── keys/                api_keys.env.example -> copy me
+└── VoidCryptoTrader-Release/    <- packaged app used by Void.bat
     └── app/
         ├── voidtrade.py         web dashboard server
         ├── gui_app.py           desktop charts
         └── void_launcher.py     single-exe entry point
 ```
 
-## 🔧 Quick start (manual, without the launcher)
+## Quick start (manual, without the launcher)
 
 Three commands — works identically on Windows, Linux and macOS:
 
@@ -142,14 +142,14 @@ python voidtrade.py web          # Windows: py -3 voidtrade.py web
 Then open **http://127.0.0.1:8080**. Other sub-commands: `voidtrade.py trade`,
 `voidtrade.py status`, `voidtrade.py gui`.
 
-## 🚨 Live trading checklist
+## Live trading checklist
 
 1. Start with `LIVE_DRY_RUN=true` and watch fills for a few days.
 2. Fund the Phantom key with **only what you can lose** (memecoins move fast).
 3. Keep `LIVE_TRADING=false` until your paper equity curve looks sane.
 4. Set `DAILY_LOSS_CAP` — the engine halts itself when hit. No exceptions.
 
-## 🩺 Troubleshooting
+## Troubleshooting
 
 | Symptom | Fix |
 |---|---|
@@ -160,11 +160,11 @@ Then open **http://127.0.0.1:8080**. Other sub-commands: `voidtrade.py trade`,
 | `gui` does nothing on a server | Headless machine — no display for Tkinter; use `web` or `trade` instead |
 | Live swaps rejected / honeypot warnings | Normal safety rails — that's the GoPlus scan doing its job |
 
-## ⚠️ Disclaimer
+## Disclaimer
 
 Educational software. Crypto trading is extremely risky; most memecoins go to zero.
 Nothing here is financial advice. You are responsible for every transaction you sign.
 
-## 📜 License
+## License
 
 Apache-2.0 — see [LICENSE](LICENSE).

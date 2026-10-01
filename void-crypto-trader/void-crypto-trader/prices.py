@@ -1,6 +1,6 @@
 """
 Real-time price feeds with caching and fallbacks.
-CoinGecko (no key) → Jupiter (optional key) → demo prices.
+CoinGecko (no key) -> Jupiter (optional key) -> demo prices.
 """
 
 from __future__ import annotations

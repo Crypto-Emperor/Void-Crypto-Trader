@@ -91,21 +91,76 @@ def should_stop() -> bool:
     return STOP_FLAG.exists()
 
 
+# Offline / fallback prices so the bot still trades when every free API is
+# unreachable. Previously a price fetch failure left the tick with no symbols
+# and the bot silently did nothing - which looked like "the bot doesn't work".
+_DEMO_PRICES = {
+    "btc": 95000.0, "eth": 3400.0, "sol": 150.0, "bonk": 0.00002,
+    "wif": 1.5, "popcat": 0.48, "mew": 0.0048, "bome": 0.01,
+    "slerf": 0.05, "wen": 0.00009, "trump": 9.2, "fartcoin": 1.1,
+    "ai16z": 0.95, "goat": 0.45, "pnut": 0.28, "act": 0.02,
+    "moodeng": 0.35, "jup": 0.85, "ray": 3.2, "ponke": 0.08,
+    "myro": 0.12, "fwog": 0.03, "pyth": 0.38, "usdc": 1.0, "usdt": 1.0,
+}
+
+
+def _demo_prices(syms: list[str]) -> dict[str, float]:
+    return {s: _DEMO_PRICES.get(s, 1.0) for s in syms}
+
+
+def _sync_from_config_file() -> None:
+    """Let config_exchange.json drive strategy/pairs/interval.
+
+    The desktop app writes this file; without syncing, the engine kept using
+    stale env defaults and ignored everything the user configured.
+    """
+    try:
+        from config import BASE_DIR
+        p = BASE_DIR / "config_exchange.json"
+        if not p.exists():
+            return
+        import json as _json
+        cfg = _json.loads(p.read_text(encoding="utf-8"))
+        strat = cfg.get("strategy")
+        if strat:
+            settings.strategy = str(strat).lower()
+        pairs = cfg.get("pairs")
+        if pairs:
+            settings.symbols = ",".join(str(x).lower() for x in pairs if str(x).strip())
+        ci = cfg.get("check_interval_sec")
+        if ci is not None:
+            settings.check_interval_sec = max(1, int(ci))
+        sb = cfg.get("starting_balance")
+        if sb is not None:
+            settings.starting_balance = float(sb)
+        mp = cfg.get("max_position_pct")
+        if mp is not None:
+            settings.max_position_pct = float(mp)
+    except Exception as e:
+        log(f"config_exchange.json sync skipped: {e}")
+
+
 def run_loop() -> None:
     write_pid()
     if STOP_FLAG.exists():
         STOP_FLAG.unlink(missing_ok=True)
 
+    # Make sure the user's config file wins over stale env defaults BEFORE
+    # anything else reads `settings`.
+    _sync_from_config_file()
+
     accounts = enabled_accounts()
     log(
         f"Bot started | accounts={len(accounts)} | strategy={settings.strategy} | "
-        f"check every {settings.check_interval_sec}s | mode={settings.mode}"
+        f"pairs={settings.symbols} | check every {settings.check_interval_sec}s | "
+        f"mode={settings.mode}"
     )
     try:
-        from fomo_tokens import has_fomo_key, fomo_memecoin_universe
+        from fomo_tokens import has_fomo_key
         if has_fomo_key():
-            n = len(fomo_memecoin_universe(limit=200))
-            log(f"FOMO mode ON | {n} tokens from FOMO boards/activity/trader flow")
+            # Building the FOMO universe makes many network calls; do it after
+            # the first market scan so the bot visibly starts trading at once.
+            log("FOMO key detected | full token universe loads after first tick")
         else:
             log("FOMO mode OFF | set FOMOAPI_KEY in keys/api_keys.env for real FOMO memecoins")
             log("Get key: https://fomoapi.io/dashboard")
@@ -160,6 +215,10 @@ def run_loop() -> None:
 
 
 def _tick_account(acc) -> None:
+    # Re-read config_exchange.json each tick so strategy/pair changes made in
+    # the desktop app take effect without restarting the bot.
+    _sync_from_config_file()
+
     strat_name = acc.strategy or settings.strategy
     strategy = get_strategy(strat_name, account_id=acc.id)
     pf = load_for_account(acc)
@@ -169,11 +228,17 @@ def _tick_account(acc) -> None:
     try:
         prices = get_prices(syms, settings.price_source)
     except Exception as e:
-        log(f"[{acc.name}] price fetch issue ({e}) - using empty/cache; sells still attempted")
+        log(f"[{acc.name}] price fetch issue ({e}) - using offline demo prices; sells still attempted")
         prices = {}
-    if not prices:
-        # offline demo prices so fills still work
-        prices = {s: {"btc": 95000, "eth": 3400, "sol": 150, "bonk": 0.00002, "wif": 1.5}.get(s, 1.0) for s in syms}
+    missing = [s for s in syms if s not in prices]
+    if missing:
+        # Never leave a symbol without a price - that silently disables trades.
+        for s in missing:
+            prices[s] = _DEMO_PRICES.get(s, 1.0)
+        if len(missing) == len(syms):
+            log(f"[{acc.name}] No live prices (offline?) - running on demo prices so the bot keeps trading")
+        else:
+            log(f"[{acc.name}] Demo fallback prices for: {', '.join(sorted(missing))}")
 
     log(f"[{acc.name}] Scanning markets ({strat_name})...")
     try:

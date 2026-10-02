@@ -40,11 +40,50 @@ def load_config() -> dict:
     return {"dry_run": True, "starting_balance": 100, "pairs": ["SOL", "BTC"]}
 
 
+def _sync_settings_from_config(cfg: dict) -> None:
+    """Make config_exchange.json actually drive the trading engine.
+
+    Without this, 'Void.bat trade' prints one strategy (from the config file)
+    while auto_trader silently runs another (from env defaults), and the bot
+    scans symbols the user never configured - which looks exactly like a bot
+    that 'does nothing'.
+    """
+    try:
+        from config import settings
+        strat = cfg.get("strategy")
+        if strat:
+            settings.strategy = str(strat).lower()
+        pairs = cfg.get("pairs")
+        if pairs:
+            settings.symbols = ",".join(str(p).lower() for p in pairs if str(p).strip())
+        ci = cfg.get("check_interval_sec")
+        if ci is not None:
+            try:
+                settings.check_interval_sec = max(1, int(ci))
+            except (TypeError, ValueError):
+                pass
+        sb = cfg.get("starting_balance")
+        if sb is not None:
+            try:
+                settings.starting_balance = float(sb)
+            except (TypeError, ValueError):
+                pass
+        mp = cfg.get("max_position_pct")
+        if mp is not None:
+            try:
+                settings.max_position_pct = float(mp)
+            except (TypeError, ValueError):
+                pass
+    except Exception as e:
+        print(f"  [!] Could not sync settings from config_exchange.json: {e}")
+
+
 def cmd_status():
     from accounts import enabled_accounts
     from portfolio import load_for_account
     from prices import get_prices
     cfg = load_config()
+    _sync_settings_from_config(cfg)
     print("VoidTrade status")
     print(f"  dry_run: {cfg.get('dry_run', True)}")
     print(f"  strategy: {cfg.get('strategy')}")
@@ -62,8 +101,11 @@ def cmd_status():
 
 def cmd_trade():
     cfg = load_config()
+    _sync_settings_from_config(cfg)
+    interval = cfg.get("check_interval_sec", 5)
     print("Starting dry-run bot (Ctrl+C to stop)...")
-    print(f"Strategy={cfg.get('strategy')} interval={cfg.get('check_interval_sec', 5)}s")
+    print(f"Strategy={cfg.get('strategy')} interval={interval}s "
+          f"pairs={','.join(p.lower() for p in (cfg.get('pairs') or []))}")
     import auto_trader
     auto_trader.run_loop()
 

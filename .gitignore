@@ -1,14 +1,5 @@
-# Compiled and build artifacts
-__pycache__/
-*.pyc
+#Compiled and build artifacts
+build/
 
-# Environment and sensitive data
-.env
-.env.local
-*.env.*
-# Inno Setup build artifacts
-VoidCryptoTrader-Release/installer/Output/
-VoidCryptoTrader-Release/installer/files/*.exe
-VoidCryptoTrader-Release/app/build/
-VoidCryptoTrader-Release/app/dist/
-VoidCryptoTrader-Release/app/*.spec
+#Windows specific files
+*.bat

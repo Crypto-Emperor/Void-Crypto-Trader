@@ -103,12 +103,12 @@ MODES = {"cli": run_cli, "web": run_web, "gui": run_gui, "worker": run_worker}
 
 # ------------------------------------------------------------- GUI menu ----
 CHOICES = [
+    ("Desktop Exchange App", "gui", [],
+     "Native window - no browser, no web address (recommended)."),
     ("Terminal Trading Desk", "cli", [],
      "Interactive bot: buy/sell, portfolio, projections, copy-trade."),
     ("Web Dashboard", "web", [],
-     "Browser UI at http://127.0.0.1:8080."),
-    ("Desktop Chart Terminal", "gui", [],
-     "Exchange-style screen with live price charts."),
+     "Legacy browser UI at http://127.0.0.1:8080."),
     ("Start Auto-Trader", "start", ["--mode", "worker"],
      "Runs strategies in the background while you sleep."),
     ("Stop Auto-Trader", "stop", ["cli", "stop"],
@@ -220,8 +220,8 @@ def main_menu() -> int:
 def _terminal_menu() -> int:
     """Headless fallback menu (Linux/macOS without Tk or DISPLAY)."""
     options = [
-        ("Web dashboard (recommended)", "web"),
-        ("Trading desk (terminal bot)", "--mode worker"),
+        ("Desktop exchange app (recommended)", "gui"),
+        ("Trading desk (terminal bot)", "cli"),
         ("Portfolio status", "status"),
         ("Build/run from source only - exit", None),
     ]
@@ -237,10 +237,10 @@ def _terminal_menu() -> int:
     if idx is None:
         return 0
     label, mode = options[idx]
-    if mode == "web":
-        return run_web([])
-    if mode.startswith("--mode"):
-        return run_worker([])
+    if mode == "gui":
+        return run_gui([])
+    if mode == "cli":
+        return run_cli([])  # no subcommand -> interactive trading desk
     return run_cli(["status"])
 
 
@@ -268,8 +268,12 @@ def main() -> int:
         head = argv[0].lower()
         if head == "web":
             return run_web(argv[1:])
-        if head == "gui":
+        if head in ("gui", "app", "desktop"):
             return run_gui(argv[1:])
+        if head in ("desk", "desktop"):
+            # terminal trading desk needs a visible console window
+            _console_window([])
+            return 0
         if head in KNOWN_CLI:
             return run_cli(argv)
 

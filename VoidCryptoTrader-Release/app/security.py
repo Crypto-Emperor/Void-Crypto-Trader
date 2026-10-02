@@ -330,6 +330,16 @@ def check_before_buy(
     mint = MINTS.get(lower, key if looks_like_mint(key) else None)
     if mint is None:
         if strict:
+            # Paper/sim mode has no real contract exposure, and failing closed
+            # here blocked EVERY buy of well-known symbols (bonk/wif/popcat...)
+            # that lack a mint mapping - the #1 reason "the bot never trades".
+            try:
+                from config import settings as _s
+                _mode_ok = str(getattr(_s, "mode", "sim")).lower() != "live"
+            except Exception:
+                _mode_ok = True
+            if _mode_ok:
+                return True, "paper trade - honeypot scan skipped (no mint)", None
             return False, (
                 f"Refusing buy of '{key}': not allow-listed and no mint address. "
                 "Pass a contract/mint address for honeypot scan."
@@ -350,4 +360,16 @@ def check_before_buy(
     reason = result.blocked_reason()
     if result.risk_notes:
         reason += " | " + "; ".join(result.risk_notes)
+    # Scanner unreachable / offline should not silently kill every trade in
+    # paper mode; live mode keeps failing closed.
+    try:
+        from config import settings as _s
+        scanner_down = (
+            getattr(result, "raw_summary", "") == "error"
+            or any(str(n).startswith("scanner error") for n in (result.risk_notes or []))
+        )
+        if str(getattr(_s, "mode", "sim")).lower() != "live" and scanner_down:
+            return True, f"scanner unavailable - paper trade allowed ({reason})", result
+    except Exception:
+        pass
     return False, reason, result

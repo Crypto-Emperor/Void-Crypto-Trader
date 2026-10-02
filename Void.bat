@@ -8,14 +8,17 @@ rem   VOID CRYPTO TRADER - the only launcher you need.
 rem   Double-click this file. That is it. It will:
 rem     1. Find Python (or open the installer for you)      [one time]
 rem     2. Install dependencies                             [one time]
-rem     3. Launch the VoidTrade web dashboard               [every time]
+rem     3. Launch the Void Exchange DESKTOP APP             [every time]
+rem        (a native window - no browser, no web server, no IP/port)
 rem
 rem   Advanced - pass a command after Void.bat:
-rem     Void.bat trade    run the bot in this terminal
-rem     Void.bat status   portfolio snapshot
-rem     Void.bat gui      desktop chart terminal (Tkinter)
-rem     Void.bat menu     interactive launcher menu
-rem     Void.bat build    build the real VoidCryptoTrader.exe (PyInstaller)
+rem     Void.bat            the desktop app (default)
+rem     Void.bat trade      run the auto-trading bot in this terminal
+rem     Void.bat status     portfolio snapshot
+rem     Void.bat desk       terminal trading desk (rich CLI)
+rem     Void.bat menu       interactive launcher menu
+rem     Void.bat build      build the real VoidCryptoTrader.exe (PyInstaller)
+rem     Void.bat setup      build the Windows installer (Inno Setup .iss)
 rem ============================================================================
 
 cd /d "%~dp0"
@@ -48,25 +51,48 @@ type nul > "%MARKER%"
 
 rem ---------------------------------------------------------------- dispatch --
 set "CMD=%~1"
-if "%CMD%"=="" set "CMD=web"
+if "%CMD%"=="" set "CMD=app"
 
-if /i "%CMD%"=="trade"  goto :run_trade
-if /i "%CMD%"=="status" goto :run_status
+if /i "%CMD%"=="app"    goto :run_gui
 if /i "%CMD%"=="gui"    goto :run_gui
+if /i "%CMD%"=="desk"   goto :run_desk
+if /i "%CMD%"=="cli"    goto :run_desk
+if /i "%CMD%"=="trade"  goto :run_trade
+if /i "%CMD%"=="bot"    goto :run_trade
+if /i "%CMD%"=="status" goto :run_status
 if /i "%CMD%"=="menu"   goto :menu
 if /i "%CMD%"=="build"  goto :build_exe
-goto :run_web
+if /i "%CMD%"=="setup"  goto :build_installer
+if /i "%CMD%"=="installer" goto :build_installer
+if /i "%CMD%"=="web"    goto :run_web
+goto :run_gui
 
-:run_web
-echo   [+] Launching the VoidTrade dashboard - your browser will open shortly.
-echo       Keep this window open while trading. Close it to stop.
+rem ------------------------------------------------- desktop app (default) --
+:run_gui
+echo   [+] Opening the Void Exchange desktop app...
+echo       A native window will appear. No browser, no web address.
 echo.
 pushd "%APP%"
-call %PY% voidtrade.py web
+start "" %PY% gui_app.py
 popd
-goto :end_pause
+goto :end
 
+rem --------------------------------------------- one-click installer build ---
+:build_installer
+if exist "%~dp0VoidCryptoTrader-Release\build_installer.bat" (
+    call "%~dp0VoidCryptoTrader-Release\build_installer.bat"
+) else if exist "%~dp0build_installer.bat" (
+    call "%~dp0build_installer.bat"
+) else (
+    echo   [X] Could not find build_installer.bat next to Void.bat.
+    pause
+)
+goto :end
+
+rem ------------------------------------------------- auto-trader in terminal -
 :run_trade
+echo   [+] Running the auto-trading bot in this window (Ctrl+C to stop).
+echo.
 pushd "%APP%"
 call %PY% voidtrade.py trade
 popd
@@ -78,9 +104,20 @@ call %PY% voidtrade.py status
 popd
 goto :end_pause
 
-:run_gui
+rem ------------------------------------------------- terminal trading desk ---
+:run_desk
 pushd "%APP%"
-call %PY% gui_app.py
+call %PY% bot.py interactive
+popd
+goto :end_pause
+
+rem ------------------------------------------- legacy web dashboard (opt-in) -
+:run_web
+echo   [+] Launching the legacy web dashboard - your browser will open.
+echo       Note: the desktop app (Void.bat with no arguments) is recommended.
+echo.
+pushd "%APP%"
+call %PY% voidtrade.py web
 popd
 goto :end_pause
 
@@ -88,20 +125,24 @@ rem ------------------------------------------------------------------ menu ---
 :menu
 echo.
 echo     ----------------------------------------------
-echo      [1] Web dashboard         (recommended)
-echo      [2] Trading desk          (terminal bot)
-echo      [3] Portfolio status
-echo      [4] Desktop charts        (Tkinter)
+echo      [1] Desktop app           (recommended)
+echo      [2] Auto-trading bot      (terminal)
+echo      [3] Terminal trading desk
+echo      [4] Portfolio status
 echo      [5] Build VoidCryptoTrader.exe
+echo      [6] Build Windows installer (Inno Setup)
+echo      [7] Legacy web dashboard
 echo      [0] Exit
 echo     ----------------------------------------------
-choice /c 123450 /n /m "    Pick one: "
-if errorlevel 6 goto :end
+choice /c 12345670 /n /m "    Pick one: "
+if errorlevel 8 goto :end
+if errorlevel 7 goto :run_web
+if errorlevel 6 goto :build_installer
 if errorlevel 5 goto :build_exe
-if errorlevel 4 goto :run_gui
-if errorlevel 3 goto :run_status
+if errorlevel 4 goto :run_status
+if errorlevel 3 goto :run_desk
 if errorlevel 2 goto :run_trade
-goto :run_web
+goto :run_gui
 
 rem ------------------------------------------------------------ build .exe ---
 :build_exe

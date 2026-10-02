@@ -68,8 +68,17 @@ def cmd_trade():
     auto_trader.run_loop()
 
 
+def _port_in_use(port: int) -> bool:
+    """True if something is already listening on 127.0.0.1:port."""
+    import socket
+    with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
+        s.settimeout(0.5)
+        return s.connect_ex(("127.0.0.1", port)) == 0
+
+
 def cmd_web():
     """Minimal pure-Python web UI (FreqUI-like)."""
+    import os
     try:
         from flask import Flask, jsonify, request, Response
     except ImportError:
@@ -77,6 +86,25 @@ def cmd_web():
         import subprocess
         subprocess.check_call([sys.executable, "-m", "pip", "install", "-q", "flask"])
         from flask import Flask, jsonify, request, Response
+
+    # Pick a free port: default 8080, then VOID_PORT env, then scan 8081..8099.
+    # If the browser was opened before this server binds (or an old instance is
+    # still holding the port), the page looks dead - so fail loudly instead.
+    try:
+        port = int(os.environ.get("VOID_PORT") or 8080)
+    except ValueError:
+        port = 8080
+    if _port_in_use(port):
+        for cand in range(port + 1, port + 20):
+            if not _port_in_use(cand):
+                print(f"  [!] Port {port} is already in use "
+                      f"(an older VoidTrade dashboard?). Using {cand} instead.")
+                port = cand
+                break
+        else:
+            print(f"  [X] Ports {port}-{port + 19} are all busy. Close the other "
+                  f"program (or stop any previous Void window) and re-run.")
+            return
 
     app = Flask(__name__)
     cfg = load_config()
@@ -232,9 +260,20 @@ refresh(); setInterval(refresh, 4000);
             pass
         return jsonify({"ok": True})
 
-    print("VoidTrade web UI -> http://127.0.0.1:8080")
-    threading.Timer(1.0, lambda: webbrowser.open("http://127.0.0.1:8080")).start()
-    app.run(host="127.0.0.1", port=8080, debug=False, use_reloader=False)
+    url = f"http://127.0.0.1:{port}"
+    print(f"VoidTrade web UI -> {url}")
+    print("  (If the browser tab shows an error, wait a second and press F5 - "
+          "the page must load AFTER the server below says 'Running'.)")
+    threading.Timer(1.5, lambda: webbrowser.open(url)).start()
+    try:
+        app.run(host="127.0.0.1", port=port, debug=False, use_reloader=False)
+    except OSError as e:
+        # Most common cause of a "dead" 127.0.0.1 page: bind failed but the
+        # browser still opened. Show the real reason instead of a stack trace.
+        print(f"  [X] Could not start the web server on port {port}: {e}")
+        print(f"      Another program is using that port, or a previous Void")
+        print(f"      window is still open. Close it and re-run, or set")
+        print(f"      VOID_PORT to a different number.")
 
 
 def main():

@@ -44,10 +44,10 @@ echo   [OK] Python: !PY!
 
 rem ----------------------------------------------- install build deps --------
 echo   [*] Making sure PyInstaller + app deps are installed (one time)...
-call !PY! -m pip install --quiet --disable-pip-version-check pyinstaller&call !PY! -m pip install --quiet --disable-pip-version-check -r "%APP%\requirements.txt"
+call !PY! -m pip install --quiet --disable-pip-version-check pyinstaller & call !PY! -m pip install --quiet --disable-pip-version-check -r "%APP%\requirements.txt"
 if errorlevel 1 (
     echo   [!] Retrying with --user...
-    call !PY! -m pip install --quiet --disable-pip-version-check --user pyinstaller&call !PY! -m pip install --quiet --disable-pip-version-check --user -r "%APP%\requirements.txt"
+    call !PY! -m pip install --quiet --disable-pip-version-check --user pyinstaller & call !PY! -m pip install --quiet --disable-pip-version-check --user -r "%APP%\requirements.txt"
 )
 
 rem ---------------------------------------------------- build the single exe --

@@ -32,6 +32,14 @@
 #define MyAppURL       "https://github.com/void/void-crypto-trader"
 #define MyAppExeName   "VoidCryptoTrader.exe"
 
+; Fail early with a clear message instead of a cryptic Inno error if the
+; exe has not been built yet. Run ..\build_installer.bat first, or build
+; manually with PyInstaller and copy dist\VoidCryptoTrader.exe into
+; installer\files\.
+#if !FileExists(AddBackslash(SourceDir) + "files\" + MyAppExeName)
+  #error VoidCryptoTrader.exe is missing from the "installer\files" folder. Build it first: run ..\build_installer.bat (or build with PyInstaller inside the app folder and copy dist\VoidCryptoTrader.exe to installer\files\).
+#endif
+
 [Setup]
 ; NOTE: AppId uniquely identifies this app for upgrades - do not change it
 ; once shipped.
@@ -67,6 +75,9 @@ Name: "desktopicon"; Description: "{cm:CreateDesktopIcon}"; \
 
 [Files]
 ; --- the built single-file exe (see header for how to build it) -----------
+; NOTE: this file must exist BEFORE compiling - run ..\build_installer.bat
+; (or build with PyInstaller and copy dist\VoidCryptoTrader.exe here).
+; If it is missing, Inno would otherwise fail with a confusing error later.
 Source: "files\{#MyAppExeName}"; DestDir: "{app}"; Flags: ignoreversion
 ; --- bundled data the launcher expects NEXT TO the exe --------------------
 ; keys template, README, license, version marker, default config/state seeds.

@@ -37,10 +37,10 @@ echo.
 rem ----------------------------------------------------------- install deps --
 if exist "%MARKER%" goto :deps_ok
 echo   [*] Installing dependencies (first run only, about a minute)...
-"!PY!" -m pip install --quiet --disable-pip-version-check -r "%REQ%"
+call %PY% -m pip install --quiet --disable-pip-version-check -r "%REQ%"
 if errorlevel 1 (
     echo   [!] Pip failed - retrying with --user...
-    "!PY!" -m pip install --quiet --disable-pip-version-check --user -r "%REQ%"
+    call %PY% -m pip install --quiet --disable-pip-version-check --user -r "%REQ%"
     if errorlevel 1 goto :deps_fail
 )
 type nul > "%MARKER%"
@@ -62,25 +62,25 @@ echo   [+] Launching the VoidTrade dashboard - your browser will open shortly.
 echo       Keep this window open while trading. Close it to stop.
 echo.
 pushd "%APP%"
-"!PY!" voidtrade.py web
+call %PY% voidtrade.py web
 popd
 goto :end_pause
 
 :run_trade
 pushd "%APP%"
-"!PY!" voidtrade.py trade
+call %PY% voidtrade.py trade
 popd
 goto :end_pause
 
 :run_status
 pushd "%APP%"
-"!PY!" voidtrade.py status
+call %PY% voidtrade.py status
 popd
 goto :end_pause
 
 :run_gui
 pushd "%APP%"
-"!PY!" gui_app.py
+call %PY% gui_app.py
 popd
 goto :end_pause
 
@@ -106,9 +106,9 @@ goto :run_web
 rem ------------------------------------------------------------ build .exe ---
 :build_exe
 echo   [*] Making sure PyInstaller is available...
-"!PY!" -m pip install --quiet --disable-pip-version-check pyinstaller
+call %PY% -m pip install --quiet --disable-pip-version-check pyinstaller
 pushd "%APP%"
-"!PY!" -m PyInstaller --noconfirm --onefile --name VoidCryptoTrader void_launcher.py
+call %PY% -m PyInstaller --noconfirm --onefile --name VoidCryptoTrader void_launcher.py
 popd
 if errorlevel 1 (
     echo   [X] Build failed. Scroll up for the error message.
